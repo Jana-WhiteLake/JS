@@ -1,0 +1,41 @@
+div {
+    margin: 0 auto;
+}
+body{
+    background-color: rgb(2, 2, 82);
+    color: white;
+}
+.canvas {
+    margin: 0 auto;
+    width: 320px;
+    height: 400px;
+    background-color: cornflowerblue;
+    position: relative;
+    border: solid 8px rgb(71, 115, 151);
+}
+
+#apple {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: crimson;
+    position: absolute;
+}
+
+.snake-segment {
+    width: 14px;
+    height: 14px;
+    background-color: rgb(61, 190, 110);
+    border: solid 2px rgb(2, 2, 82);
+    position: absolute;
+    border-radius: 30%;
+    /* transition: all ease 0.5s; */
+}
+
+.snake-head {
+    width: 14px;
+    height: 14px;
+    background-color: rgb(115, 219, 155);
+    position: absolute;
+    border-radius: 30%;
+}
