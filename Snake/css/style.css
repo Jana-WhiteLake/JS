@@ -15,11 +15,12 @@ body{
 }
 
 #apple {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background-color: crimson;
+    background: url(../img/icon-apple.png) no-repeat;
     position: absolute;
+    filter: saturate(4)
 }
 
 .snake-segment {

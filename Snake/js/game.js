@@ -1,15 +1,28 @@
+const TILE_SIZE = 16;
+const CANVAS_WIDTH = 10;
+const CANVAS_HEIGHT = 10;
+
+
 let snake = document.getElementsByClassName("snake-head")[0];
 let body = document.getElementById("body");
 let apple = document.getElementById("apple");
 let canvas = document.getElementById("canvas");
 let score_div = document.getElementById("score");
 
-body.addEventListener("keypress", callback);
+canvas.style.width = CANVAS_WIDTH * TILE_SIZE + "px";
+canvas.style.height = CANVAS_HEIGHT * TILE_SIZE + "px";
 
-setInterval(gameCycle, 150)
+body.addEventListener("keypress", control);
+
+let interval = setInterval(gameCycle, 150)
+
+console.log(interval);
 
 let score = 0;
-let appleFlag = false;
+
+/* Отвечает за добавление нового сегмента
+*/
+let segmentToBeAddedFlag = false;
 let snake_body = [{
     x: 0,
     y: 0,
@@ -19,32 +32,47 @@ let snake_body = [{
 
 let direction;
 
-let apple_x = Math.floor(Math.random() * 20) * 16;
-let apple_y = Math.floor(Math.random() * 25) * 16;
+/**не меняется направление в коде до тех пор, пока оно не отрисуется, 
+ * т.е. чтобы нельзя было менять направление за один проход игрового цикла
+*/
+let flagAppliedDirection = false; 
 
-apple.style.top = apple_y + "px";
-apple.style.left = apple_x + "px";
+let apple_x = Math.floor(Math.random() * CANVAS_WIDTH);
+let apple_y = Math.floor(Math.random() * CANVAS_HEIGHT);
+
+apple.style.top = apple_y * TILE_SIZE + "px";
+apple.style.left = apple_x * TILE_SIZE + "px";
 
 // слушатель клавиатуры передаёт в эту функцию нажатую кнопку
-function callback(event) {
+function control(event) {
     console.log(event);
-    if (event.key == "w") {
-        direction = "UP"
+    if (!flagAppliedDirection) return;
+    if (event.key == "w" || event.key == "ц") {
+        if (direction != "DOWN" && snake_body.length != 1 || snake_body.length == 1) {
+            direction = "UP"
+        }
     }
-    else if (event.key == "a") {
-        direction = "LEFT"
+    else if (event.key == "a" || event.key == "ф") {
+        if (direction != "RIGHT" && snake_body.length != 1 || snake_body.length == 1) {
+            direction = "LEFT"
+        }
     }
-    else if (event.key == "d") {
-        direction = "RIGHT"
+    else if (event.key == "d" || event.key == "в") {
+        if (direction != "LEFT" && snake_body.length != 1 || snake_body.length == 1) {
+            direction = "RIGHT"
+        }
     }
-    else if (event.key == "s") {
-        direction = "DOWN"
+    else if (event.key == "s" || event.key == "ы") {
+        if (direction != "UP" && snake_body.length != 1 || snake_body.length == 1) {
+            direction = "DOWN"
+        }
     }
+    flagAppliedDirection = false;
 }
 
 function moveFunction() {
-    if (appleFlag == true) {
-        appleFlag = false;
+    if (segmentToBeAddedFlag == true) {
+        segmentToBeAddedFlag = false;
         addSegment();
         return;
     }
@@ -56,29 +84,30 @@ function moveFunction() {
         }
     }
     if (direction == "UP") {
-        snake_body[0].y -= 16;
+        snake_body[0].y -= 1;
     }
     else if (direction == "LEFT") {
-        snake_body[0].x -= 16;
+        snake_body[0].x -= 1;
     }
     else if (direction == "RIGHT") {
-        snake_body[0].x += 16;
+        snake_body[0].x += 1;
     }
     else if (direction == "DOWN") {
-        snake_body[0].y += 16;
+        snake_body[0].y += 1;
     }
     if (snake_body[0].x < 0) {
-        snake_body[0].x = 304;
+        snake_body[0].x = CANVAS_WIDTH - 1;
     }
-    else if (snake_body[0].x > 304) {
+    else if (snake_body[0].x > CANVAS_WIDTH - 1) {
         snake_body[0].x = 0;
     }
     else if (snake_body[0].y < 0) {
-        snake_body[0].y = 384;
+        snake_body[0].y = CANVAS_HEIGHT - 1;
     }
-    else if (snake_body[0].y > 384) {
+    else if (snake_body[0].y > CANVAS_HEIGHT - 1) {
         snake_body[0].y = 0;
     }
+    flagAppliedDirection = true; 
 }
 
 function gameCycle() {
@@ -89,22 +118,36 @@ function gameCycle() {
 
 function logicFunction() {
     if (apple_x == snake_body[0].x && apple_y == snake_body[0].y) {
-        apple_x = Math.floor(Math.random() * 20) * 16;
-        apple_y = Math.floor(Math.random() * 25) * 16;
+        
+        do {
+            apple_x = Math.floor(Math.random() * CANVAS_WIDTH);
+            apple_y = Math.floor(Math.random() * CANVAS_HEIGHT);
+            console.log("перерисовываю яблоко")
+        } while (appleCrossesSnake())
 
-        appleFlag = true;
+        
+        segmentToBeAddedFlag = true;
 
         score++;
         score_div.innerHTML = "Score: " + score;
     }
+    for (let segment of snake_body) {
+        let index = snake_body.indexOf(segment);
+        if (index != 0) {
+            if (segment.x == snake_body[0].x && segment.y == snake_body[0].y) {
+                clearInterval(interval);
+                alert(`GAME OVER!\n Score: ${score}`)
+            }
+        }
+    }
 }
 
 function drawFunction() {
-    apple.style.top = apple_y + "px";
-    apple.style.left = apple_x + "px";
+    apple.style.top = apple_y * TILE_SIZE + "px";
+    apple.style.left = apple_x * TILE_SIZE + "px";
     for (let segment of snake_body) {
-        segment.element.style.top = segment.y + "px"; //отрисовывает позицию сегмента змейки
-        segment.element.style.left = segment.x + "px";
+        segment.element.style.top = segment.y * TILE_SIZE + "px"; //отрисовывает позицию сегмента змейки
+        segment.element.style.left = segment.x * TILE_SIZE + "px";
     }
 }
 
@@ -119,30 +162,30 @@ function addSegment() {
 
     if (direction == "UP") {
         newSegment_x = snake_body[0].x;
-        newSegment_y = snake_body[0].y - 16;
+        newSegment_y = snake_body[0].y - 1;
     }
     else if (direction == "LEFT") {
-        newSegment_x = snake_body[0].x - 16;
+        newSegment_x = snake_body[0].x - 1;
         newSegment_y = snake_body[0].y;
     }
     else if (direction == "RIGHT") {
-        newSegment_x = snake_body[0].x + 16;
+        newSegment_x = snake_body[0].x + 1;
         newSegment_y = snake_body[0].y;
     }
     else if (direction == "DOWN") {
         newSegment_x = snake_body[0].x;
-        newSegment_y = snake_body[0].y + 16;
+        newSegment_y = snake_body[0].y + 1;
     }
     if (newSegment_x < 0) {
-        newSegment_x = 304;
+        newSegment_x = CANVAS_WIDTH - 1;
     }
-    else if (newSegment_x > 304) {
+    else if (newSegment_x > CANVAS_WIDTH - 1) {
         newSegment_x = 0;
     }
     else if (newSegment_y < 0) {
-        newSegment_y = 384;
+        newSegment_y = CANVAS_HEIGHT - 1;
     }
-    else if (newSegment_y > 384) {
+    else if (newSegment_y > CANVAS_HEIGHT - 1) {
         newSegment_y = 0;
     }
 
@@ -153,4 +196,10 @@ function addSegment() {
         y: newSegment_y, //координаты сегмента хвоста
         element: newSegment, //<div> - сегмент хвоста змейки
     })
+}
+function appleCrossesSnake() {
+    for (let segment of snake_body){
+        if (apple_x == segment.x && apple_y == segment.y) return true
+    }
+    return false;
 }
